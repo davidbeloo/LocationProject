@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">LocationProject</string>
+    <string name="get_location">Get location</string>
+    <string name="get_location_updates">Get location update</string>
+    <string name="get_address_from_location">Get address from location</string>
+    <string name="latitude">Latitude:</string>
+    <string name="longitude">Longitude:</string>
+    <string name="no_location_permission">No location permission</string>
+</resources>
