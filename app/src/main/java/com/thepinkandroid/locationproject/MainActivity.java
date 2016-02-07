@@ -1,13 +1,16 @@
 package com.thepinkandroid.locationproject;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.LocationServices;
+import com.thepinkandroid.locationproject.services.UpdateLocationService;
 
 public class MainActivity extends GoogleApiActivity implements View.OnClickListener
 {
@@ -34,6 +37,8 @@ public class MainActivity extends GoogleApiActivity implements View.OnClickListe
     {
         mGetLastLocationButton = (Button) findViewById(R.id.getLastLocationButton);
         mGetLastLocationButton.setOnClickListener(this);
+        Button startServiceButton = (Button) findViewById(R.id.startServiceButton);
+        startServiceButton.setOnClickListener(this);
         mLatitudeValueTextView = (TextView) findViewById(R.id.latitudeValueTextView);
         mLongitudeValueTextView = (TextView) findViewById(R.id.longitudeValueTextView);
     }
@@ -51,6 +56,8 @@ public class MainActivity extends GoogleApiActivity implements View.OnClickListe
             mLatitudeValueTextView.setText(String.valueOf(mLastLocation.getLatitude()));
             mLongitudeValueTextView.setText(String.valueOf(mLastLocation.getLongitude()));
         }
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -64,6 +71,20 @@ public class MainActivity extends GoogleApiActivity implements View.OnClickListe
                     mGoogleApiClient.connect();
                 }
                 break;
+            case R.id.startServiceButton:
+                Intent intent = new Intent(this, UpdateLocationService.class);
+                startService(intent);
+//                Intent intent = new Intent(this, UpdateLocationIntentService.class);
+//                startService(intent);
+                break;
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location)
+    {
+        Toast.makeText(this, getString(R.string.location_changed), Toast.LENGTH_SHORT).show();
+        mLatitudeValueTextView.setText(String.valueOf(location.getLatitude()));
+        mLongitudeValueTextView.setText(String.valueOf(location.getLongitude()));
     }
 }

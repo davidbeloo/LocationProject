@@ -15,15 +15,28 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 /**
  * Created by DAVID-WORK on 06/02/2016.
  */
-public abstract class GoogleApiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+public abstract class GoogleApiActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener
 {
     private static final int PERMISSIONS_REQUEST_LOCATION = 1;
     protected GoogleApiClient mGoogleApiClient;
+
+    // Stores parameters for requests to the FusedLocationProviderApi.
+    protected LocationRequest mLocationRequest;
+
+    // The desired interval for location updates [50ms] . Inexact. Updates may be more or less frequent.
+    protected static final long UPDATE_INTERVAL_IN_MILLISECONDS = 50000;
+
+    // The fastest rate for active location updates. Exact. Updates will never be more frequent than this value.
+    protected static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     // Bool to track whether the app is already resolving an error
     protected boolean mResolvingError = false;
@@ -44,10 +57,32 @@ public abstract class GoogleApiActivity extends AppCompatActivity implements Goo
     }
 
     @Override
+    protected void onPause()
+    {
+        super.onPause();
+        // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
+        if (mGoogleApiClient.isConnected())
+        {
+            stopLocationUpdates();
+        }
+    }
+
+    @Override
     protected void onStop()
     {
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    /**
+     * Removes location updates from the FusedLocationApi.
+     */
+    protected void stopLocationUpdates()
+    {
+        // It is a good practice to remove location requests when the activity is in a paused or
+        // stopped state. Doing so helps battery performance and is especially
+        // recommended in applications that request frequent location updates.
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     protected void askForLocationPermission()
@@ -71,6 +106,35 @@ public abstract class GoogleApiActivity extends AppCompatActivity implements Goo
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+
+        createLocationRequest();
+    }
+
+    /**
+     * Sets up the location request. Android has two location request settings:
+     * {@code ACCESS_COARSE_LOCATION} and {@code ACCESS_FINE_LOCATION}. These settings control
+     * the accuracy of the current location. This sample uses ACCESS_FINE_LOCATION, as defined in
+     * the AndroidManifest.xml.
+     * <p>
+     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
+     * interval (5 seconds), the Fused Location Provider API returns location updates that are
+     * accurate to within a few feet.
+     */
+    protected void createLocationRequest()
+    {
+        mLocationRequest = new LocationRequest();
+
+        // Sets the desired interval for active location updates. This interval is
+        // inexact. You may not receive updates at all if no location sources are available, or
+        // you may receive them slower than requested. You may also receive updates faster than
+        // requested if other applications are requesting location at a faster interval.
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     @Override

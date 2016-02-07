@@ -6,4 +6,6 @@
     <string name="latitude">Latitude:</string>
     <string name="longitude">Longitude:</string>
     <string name="no_location_permission">No location permission</string>
+    <string name="location_changed">Location changed</string>
+    <string name="startService">Start service</string>
 </resources>

@@ -27,6 +27,13 @@
         android:layout_margin="4dp"
         android:text="@string/get_address_from_location"/>
 
+    <Button
+        android:id="@+id/startServiceButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:text="@string/startService"/>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
